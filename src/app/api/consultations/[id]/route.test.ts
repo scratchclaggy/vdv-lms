@@ -25,9 +25,7 @@ describe("GET /api/consultations/[id]", () => {
     vi.mocked(getCurrentUser).mockResolvedValue(null);
 
     const consultationId = faker.string.uuid();
-    const request = new NextRequest(
-      apiUrl(`/consultations/${consultationId}`),
-    );
+    const request = new NextRequest(apiUrl(`/consultations/${consultationId}`));
     const response = await GET(request, makeRequestParams(consultationId));
 
     expect(response.status).toBe(401);
@@ -46,9 +44,7 @@ describe("GET /api/consultations/[id]", () => {
         .build() as never,
     );
 
-    const request = new NextRequest(
-      apiUrl(`/consultations/${consultationId}`),
-    );
+    const request = new NextRequest(apiUrl(`/consultations/${consultationId}`));
     const response = await GET(request, makeRequestParams(consultationId));
 
     expect(response.status).toBe(200);
@@ -70,9 +66,7 @@ describe("GET /api/consultations/[id]", () => {
         .build() as never,
     );
 
-    const request = new NextRequest(
-      apiUrl(`/consultations/${consultationId}`),
-    );
+    const request = new NextRequest(apiUrl(`/consultations/${consultationId}`));
     const response = await GET(request, makeRequestParams(consultationId));
 
     expect(response.status).toBe(200);
@@ -87,9 +81,7 @@ describe("GET /api/consultations/[id]", () => {
     vi.mocked(prisma.consultation.findUnique).mockResolvedValue(null);
 
     const consultationId = faker.string.uuid();
-    const request = new NextRequest(
-      apiUrl(`/consultations/${consultationId}`),
-    );
+    const request = new NextRequest(apiUrl(`/consultations/${consultationId}`));
     const response = await GET(request, makeRequestParams(consultationId));
 
     expect(response.status).toBe(404);
@@ -106,9 +98,7 @@ describe("GET /api/consultations/[id]", () => {
     );
 
     const consultationId = faker.string.uuid();
-    const request = new NextRequest(
-      apiUrl(`/consultations/${consultationId}`),
-    );
+    const request = new NextRequest(apiUrl(`/consultations/${consultationId}`));
     const response = await GET(request, makeRequestParams(consultationId));
 
     expect(response.status).toBe(403);
@@ -125,9 +115,7 @@ describe("GET /api/consultations/[id]", () => {
     );
 
     const consultationId = faker.string.uuid();
-    const request = new NextRequest(
-      apiUrl(`/consultations/${consultationId}`),
-    );
+    const request = new NextRequest(apiUrl(`/consultations/${consultationId}`));
     const response = await GET(request, makeRequestParams(consultationId));
 
     expect(response.status).toBe(500);

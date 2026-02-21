@@ -2,9 +2,9 @@ import { faker } from "@faker-js/faker";
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { prisma } from "@/db";
-import { apiUrl, makeAuthUser, makeRequestParams } from "@/test/route-helpers";
 import { StudentBuilder } from "@/test/builders/student-builder";
 import { TutorBuilder } from "@/test/builders/tutor-builder";
+import { apiUrl, makeAuthUser, makeRequestParams } from "@/test/route-helpers";
 import { getCurrentUser } from "@/utils/auth";
 import { GET } from "./route";
 

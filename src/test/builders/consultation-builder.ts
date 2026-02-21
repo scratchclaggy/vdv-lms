@@ -15,8 +15,8 @@ export class ConsultationBuilder {
   private endTime = new Date(this.startTime.getTime() + 60 * 60 * 1000);
   private createdAt = new Date();
   private updatedAt = new Date();
-  private tutor = new TutorBuilder().build();
-  private student = new StudentBuilder().build();
+  private tutor = new TutorBuilder().db();
+  private student = new StudentBuilder().db();
 
   withId(id: string): this {
     this.id = id;
@@ -51,18 +51,22 @@ export class ConsultationBuilder {
   withTutor(configure: (builder: TutorBuilder) => void): this {
     const builder = new TutorBuilder();
     configure(builder);
-    this.tutor = builder.build();
+    this.tutor = builder.db();
     return this;
   }
 
   withStudent(configure: (builder: StudentBuilder) => void): this {
     const builder = new StudentBuilder();
     configure(builder);
-    this.student = builder.build();
+    this.student = builder.db();
     return this;
   }
 
-  build(): ConsultationWithRelations {
+  /**
+   * Returns only the scalar fields needed for a Prisma `db.consultation.create`
+   * call — no nested relation objects.
+   */
+  db(): Consultation {
     return {
       id: this.id,
       reason: this.reason,
@@ -72,6 +76,12 @@ export class ConsultationBuilder {
       updatedAt: this.updatedAt,
       tutorId: this.tutor.id,
       studentId: this.student.id,
+    };
+  }
+
+  build(): ConsultationWithRelations {
+    return {
+      ...this.db(),
       tutor: this.tutor,
       student: this.student,
     };

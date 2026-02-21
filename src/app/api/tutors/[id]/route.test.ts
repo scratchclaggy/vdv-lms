@@ -2,8 +2,8 @@ import { faker } from "@faker-js/faker";
 import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { prisma } from "@/db";
-import { apiUrl, makeRequestParams } from "@/test/route-helpers";
 import { TutorBuilder } from "@/test/builders/tutor-builder";
+import { apiUrl, makeRequestParams } from "@/test/route-helpers";
 import { GET } from "./route";
 
 vi.mock("@/db", () => ({
@@ -24,7 +24,7 @@ describe("GET /api/tutors/[id]", () => {
     const tutor = new TutorBuilder()
       .withId(tutorId)
       .withConsultation((consultation) => consultation.build())
-      .buildWithRelations();
+      .build();
     vi.mocked(prisma.tutor.findUnique).mockResolvedValue(tutor);
 
     const request = new NextRequest(apiUrl(`/tutors/${tutorId}`));

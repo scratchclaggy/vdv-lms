@@ -60,11 +60,27 @@ export async function POST(request: NextRequest) {
 
     const { tutorId, studentId, reason, startTime, endTime } = validation.data;
 
-    if (authUser.id !== studentId && authUser.id !== tutorId) {
+    const isStudent = authUser.id === studentId;
+    const isTutor = authUser.id === tutorId;
+
+    if (!isStudent && !isTutor) {
       return NextResponse.json(
         { error: "Cannot create consultations for this user" },
         { status: 403 },
       );
+    }
+
+    // If the caller is claiming the tutor role, verify they have a Tutor record.
+    if (isTutor) {
+      const tutorRecord = await prisma.tutor.findUnique({
+        where: { id: tutorId },
+      });
+      if (!tutorRecord) {
+        return NextResponse.json(
+          { error: "Cannot create consultations for this user" },
+          { status: 403 },
+        );
+      }
     }
 
     const consultation = await prisma.consultation.create({

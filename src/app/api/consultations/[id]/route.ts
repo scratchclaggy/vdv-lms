@@ -1,15 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { z } from "zod";
 import { prisma } from "@/db";
 import { getCurrentUser } from "@/utils/auth";
-
-const updateSchema = z.object({
-  reason: z.string().optional(),
-  startTime: z.iso.datetime().optional(),
-  endTime: z.iso.datetime().optional(),
-  studentId: z.uuid().optional(),
-  tutorId: z.uuid().optional(),
-});
 
 export async function GET(
   _request: NextRequest,

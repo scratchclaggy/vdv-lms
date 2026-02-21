@@ -57,7 +57,11 @@ export class TutorBuilder {
     return this;
   }
 
-  build(): Tutor {
+  /**
+   * Returns only the scalar fields needed for a Prisma `db.tutor.create`
+   * call — no nested relation objects.
+   */
+  db(): Tutor {
     return {
       id: this.id,
       firstName: this.firstName,
@@ -68,7 +72,7 @@ export class TutorBuilder {
     };
   }
 
-  buildWithRelations(): TutorWithRelations {
-    return { ...this.build(), consultations: this.consultations };
+  build(): TutorWithRelations {
+    return { ...this.db(), consultations: this.consultations };
   }
 }

@@ -3,6 +3,7 @@ import { NextRequest } from "next/server";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { prisma } from "@/db";
 import { ConsultationBuilder } from "@/test/builders/consultation-builder";
+import { TutorBuilder } from "@/test/builders/tutor-builder";
 import { apiUrl, makeAuthUser } from "@/test/route-helpers";
 import { getCurrentUser } from "@/utils/auth";
 import { GET, POST } from "./route";
@@ -219,6 +220,9 @@ describe("POST /api/consultations", () => {
     const tutorId = faker.string.uuid();
     const studentId = faker.string.uuid();
     vi.mocked(getCurrentUser).mockResolvedValue(makeAuthUser(tutorId));
+    vi.mocked(prisma.tutor.findUnique).mockResolvedValue(
+      new TutorBuilder().withId(tutorId).db() as never,
+    );
     vi.mocked(prisma.consultation.create).mockResolvedValue(
       new ConsultationBuilder()
         .withTutor((b) => b.withId(tutorId))

@@ -49,4 +49,12 @@ export class StudentBuilder {
       updatedAt: this.updatedAt,
     };
   }
+
+  /**
+   * Returns the scalar fields needed for a Prisma `db.student.create` call.
+   * Equivalent to `build()` since Student has no relations.
+   */
+  db(): Student {
+    return this.build();
+  }
 }
