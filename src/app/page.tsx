@@ -1,4 +1,5 @@
 import Image from "next/image";
+import { logoutAction } from "@/app/auth/logout";
 
 export default function Home() {
   return (
@@ -58,6 +59,11 @@ export default function Home() {
           >
             Documentation
           </a>
+          <form action={logoutAction}>
+            <button type="submit" className="btn btn-error btn-outline">
+              Log out
+            </button>
+          </form>
         </div>
       </main>
     </div>
