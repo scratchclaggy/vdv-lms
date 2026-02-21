@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "prisma": "dotenv -e .env.local -- prisma",
+    "prisma": "node --env-file=.env.local ./node_modules/.bin/prisma",
     "start": "next start",
     "lint": "biome check",
     "format": "biome format --write",
@@ -41,8 +41,6 @@
     "@vitejs/plugin-react": "^5.1.4",
     "babel-plugin-react-compiler": "1.0.0",
     "daisyui": "^5.5.19",
-    "dotenv": "^17.3.1",
-    "dotenv-cli": "^11.0.0",
     "prisma": "^7.4.0",
     "supabase": "^2.76.9",
     "tailwindcss": "^4",

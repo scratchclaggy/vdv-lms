@@ -1,9 +1,8 @@
 import { defineConfig } from "@playwright/test";
-import { config } from "dotenv";
 
 // Load .env.local so DATABASE_URL, SUPABASE_SERVICE_ROLE_KEY, etc. are
 // available to the global setup and test fixtures.
-config({ path: ".env.local" });
+process.loadEnvFile(".env.local");
 
 export default defineConfig({
   testDir: "integration-tests",
