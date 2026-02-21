@@ -45,13 +45,18 @@ export async function updateSession(request: NextRequest) {
   if (!user) {
     const { pathname } = request.nextUrl;
 
-    // API routes: return 401 JSON rather than redirecting
+    // Auth API routes are always public
+    if (pathname.startsWith("/api/auth/")) {
+      return supabaseResponse;
+    }
+
+    // Other API routes: return 401 JSON rather than redirecting
     if (pathname.startsWith("/api/")) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
     // Page routes: redirect to login, except for /login and /auth themselves
-    if (!pathname.startsWith("/login") && !pathname.startsWith("/auth")) {
+    if (!pathname.startsWith("/login") && !pathname.startsWith("/signup")) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
       return NextResponse.redirect(url);
