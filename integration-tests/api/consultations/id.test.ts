@@ -4,6 +4,7 @@ import { signupUser } from "@/test/api-helpers";
 import { ConsultationBuilder } from "@/test/builders/consultation-builder";
 import { StudentBuilder } from "@/test/builders/student-builder";
 import { TutorBuilder } from "@/test/builders/tutor-builder";
+import { daysFromNow } from "@/test/date-helpers";
 import { deleteAuthUser, truncateTables } from "@/test/db-helpers";
 import { db } from "@/test/integration-db";
 
@@ -41,7 +42,7 @@ test.describe("GET /api/consultations/[id]", () => {
       });
 
       const reason = faker.lorem.sentence();
-      const future = faker.date.soon({ days: 7 });
+      const future = daysFromNow(7);
       const consultation = await db.consultation.create({
         data: new ConsultationBuilder()
           .withTutor((b) => b.withId(tutor.id))
@@ -83,7 +84,7 @@ test.describe("GET /api/consultations/[id]", () => {
         data: new StudentBuilder().db(),
       });
 
-      const future = faker.date.soon({ days: 7 });
+      const future = daysFromNow(7);
       const consultation = await db.consultation.create({
         data: new ConsultationBuilder()
           .withTutor((b) => b.withId(user.id))
@@ -117,7 +118,7 @@ test.describe("GET /api/consultations/[id]", () => {
         data: new StudentBuilder().db(),
       });
 
-      const future = faker.date.soon({ days: 7 });
+      const future = daysFromNow(7);
       const consultation = await db.consultation.create({
         data: new ConsultationBuilder()
           .withTutor((b) => b.withId(tutor.id))

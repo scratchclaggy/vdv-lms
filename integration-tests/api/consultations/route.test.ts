@@ -4,6 +4,7 @@ import { signupUser } from "@/test/api-helpers";
 import { ConsultationBuilder } from "@/test/builders/consultation-builder";
 import { StudentBuilder } from "@/test/builders/student-builder";
 import { TutorBuilder } from "@/test/builders/tutor-builder";
+import { daysAgo, daysFromNow } from "@/test/date-helpers";
 import { deleteAuthUser, truncateTables } from "@/test/db-helpers";
 import { db } from "@/test/integration-db";
 
@@ -28,7 +29,7 @@ test.describe("GET /api/consultations", () => {
       });
 
       const reasonA = faker.lorem.sentence();
-      const future = faker.date.soon({ days: 7 });
+      const future = daysFromNow(7);
       await db.consultation.createMany({
         data: [
           new ConsultationBuilder()
@@ -74,7 +75,7 @@ test.describe("GET /api/consultations", () => {
         studentUser = await signupUser(request);
         const studentId = studentUser.id;
 
-        const future = faker.date.soon({ days: 7 });
+        const future = daysFromNow(7);
         await db.consultation.create({
           data: new ConsultationBuilder()
             .withTutor((b) => b.withId(tutorUser.id))
@@ -109,7 +110,7 @@ test.describe("GET /api/consultations", () => {
         studentUser = await signupUser(request);
         const studentId = studentUser.id;
 
-        const future = faker.date.soon({ days: 7 });
+        const future = daysFromNow(7);
         await db.consultation.create({
           data: new ConsultationBuilder()
             .withTutor((b) => b.withId(tutorUser.id))
@@ -142,8 +143,8 @@ test.describe("GET /api/consultations", () => {
         data: new TutorBuilder().db(),
       });
 
-      const past = faker.date.recent({ days: 1 });
-      const future = faker.date.soon({ days: 7 });
+      const past = daysAgo(7);
+      const future = daysFromNow(7);
       const futureReason = faker.lorem.sentence();
 
       await db.consultation.createMany({
@@ -209,8 +210,12 @@ test.describe("GET /api/consultations", () => {
         ],
       });
 
+      const params = new URLSearchParams({
+        from: "2041-03-01T00:00:00Z",
+        to: "2041-09-01T00:00:00Z",
+      });
       const response = await request.get(
-        "/api/consultations?from=2041-03-01T00:00:00Z&to=2041-09-01T00:00:00Z",
+        `/api/consultations?${params.toString()}`,
       );
 
       const body = await response.json();
@@ -258,7 +263,7 @@ test.describe("POST /api/consultations", () => {
         data: new StudentBuilder().db(),
       });
 
-      const future = faker.date.soon({ days: 30 });
+      const future = daysFromNow(30);
       const response = await request.post("/api/consultations", {
         data: {
           tutorId: tutor.id,
@@ -289,7 +294,7 @@ test.describe("POST /api/consultations", () => {
         data: new StudentBuilder().db(),
       });
 
-      const future = faker.date.soon({ days: 30 });
+      const future = daysFromNow(30);
       const response = await request.post("/api/consultations", {
         data: {
           tutorId: user.id,
@@ -320,7 +325,7 @@ test.describe("POST /api/consultations", () => {
       });
 
       const reason = faker.lorem.sentence();
-      const future = faker.date.soon({ days: 30 });
+      const future = daysFromNow(30);
       const response = await request.post("/api/consultations", {
         data: {
           tutorId: tutor.id,
@@ -361,7 +366,7 @@ test.describe("POST /api/consultations", () => {
         data: new StudentBuilder().db(),
       });
 
-      const future = faker.date.soon({ days: 30 });
+      const future = daysFromNow(30);
       const response = await request.post("/api/consultations", {
         data: {
           tutorId: user.id,

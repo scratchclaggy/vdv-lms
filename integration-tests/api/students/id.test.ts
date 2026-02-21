@@ -4,6 +4,7 @@ import { signupUser } from "@/test/api-helpers";
 import { ConsultationBuilder } from "@/test/builders/consultation-builder";
 import { StudentBuilder } from "@/test/builders/student-builder";
 import { TutorBuilder } from "@/test/builders/tutor-builder";
+import { daysAgo, daysFromNow } from "@/test/date-helpers";
 import { deleteAuthUser, truncateTables } from "@/test/db-helpers";
 import { db } from "@/test/integration-db";
 
@@ -104,9 +105,9 @@ test.describe("GET /api/students/[id]", () => {
         data: new TutorBuilder().db(),
       });
 
-      const past = faker.date.recent({ days: 1 });
-      const soon = faker.date.soon({ days: 1 });
-      const later = faker.date.soon({ days: 7 });
+      const past = daysAgo(7);
+      const soon = daysFromNow(7);
+      const later = daysFromNow(14);
 
       const soonReason = faker.lorem.sentence();
       const laterReason = faker.lorem.sentence();
