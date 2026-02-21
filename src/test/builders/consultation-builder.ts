@@ -1,0 +1,79 @@
+import { faker } from "@faker-js/faker";
+import type { Consultation, Student, Tutor } from "@/generated/prisma/client";
+import { StudentBuilder } from "./student-builder";
+import { TutorBuilder } from "./tutor-builder";
+
+type ConsultationWithRelations = Consultation & {
+  tutor: Tutor;
+  student: Student;
+};
+
+export class ConsultationBuilder {
+  private id = faker.string.uuid();
+  private reason = faker.lorem.sentence();
+  private startTime = faker.date.future();
+  private endTime = new Date(this.startTime.getTime() + 60 * 60 * 1000);
+  private createdAt = new Date();
+  private updatedAt = new Date();
+  private tutor = new TutorBuilder().build();
+  private student = new StudentBuilder().build();
+
+  withId(id: string): this {
+    this.id = id;
+    return this;
+  }
+
+  withReason(reason: string): this {
+    this.reason = reason;
+    return this;
+  }
+
+  withStartTime(startTime: Date): this {
+    this.startTime = startTime;
+    return this;
+  }
+
+  withEndTime(endTime: Date): this {
+    this.endTime = endTime;
+    return this;
+  }
+
+  withCreatedAt(createdAt: Date): this {
+    this.createdAt = createdAt;
+    return this;
+  }
+
+  withUpdatedAt(updatedAt: Date): this {
+    this.updatedAt = updatedAt;
+    return this;
+  }
+
+  withTutor(configure: (builder: TutorBuilder) => void): this {
+    const builder = new TutorBuilder();
+    configure(builder);
+    this.tutor = builder.build();
+    return this;
+  }
+
+  withStudent(configure: (builder: StudentBuilder) => void): this {
+    const builder = new StudentBuilder();
+    configure(builder);
+    this.student = builder.build();
+    return this;
+  }
+
+  build(): ConsultationWithRelations {
+    return {
+      id: this.id,
+      reason: this.reason,
+      startTime: this.startTime,
+      endTime: this.endTime,
+      createdAt: this.createdAt,
+      updatedAt: this.updatedAt,
+      tutorId: this.tutor.id,
+      studentId: this.student.id,
+      tutor: this.tutor,
+      student: this.student,
+    };
+  }
+}

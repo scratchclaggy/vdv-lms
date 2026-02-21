@@ -66,9 +66,10 @@ Tests use **Vitest** with `vite-tsconfig-paths` for `@/` alias resolution. Test 
 
 | Category | Convention | Example |
 |---|---|---|
+| Files — all source files | `kebab-case` | `route-helpers.ts`, `tutor-builder.ts` |
 | Files — pages | `page.tsx` inside kebab-case dir | `login/page.tsx` |
 | Files — API routes | `route.ts` inside resource dir | `api/consultations/route.ts` |
-| Files — utilities | `camelCase.ts` | `auth.ts`, `env.ts`, `db.ts` |
+| Files — utilities | kebab-case or single-word | `auth.ts`, `env.ts`, `db.ts` |
 | React components | PascalCase default export | `LoginPage`, `RootLayout` |
 | Server Actions | `camelCase` + `Action` suffix | `loginAction`, `signupAction` |
 | Utility functions | `camelCase` | `getCurrentUser`, `createClient` |
