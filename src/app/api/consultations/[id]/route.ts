@@ -1,46 +1,17 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/db";
-import { getCurrentUser } from "@/utils/auth";
+import { getConsultationAction } from "@/app/consultations/get-consultation-action";
+import { errorToResponse } from "@/utils/http-errors";
 
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const authUser = await getCurrentUser();
-  if (!authUser) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
   const { id } = await params;
 
   try {
-    const consultation = await prisma.consultation.findUnique({
-      where: { id },
-      include: {
-        tutor: true,
-        student: true,
-      },
-    });
-
-    if (!consultation) {
-      return NextResponse.json(
-        { error: "Consultation not found" },
-        { status: 404 },
-      );
-    }
-
-    if (
-      consultation.tutorId !== authUser.id &&
-      consultation.studentId !== authUser.id
-    ) {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-    }
-
+    const consultation = await getConsultationAction(id);
     return NextResponse.json(consultation);
-  } catch (_error) {
-    return NextResponse.json(
-      { error: "Failed to fetch consultation" },
-      { status: 500 },
-    );
+  } catch (error) {
+    return errorToResponse(error, "Failed to fetch consultation");
   }
 }
