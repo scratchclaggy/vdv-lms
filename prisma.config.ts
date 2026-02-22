@@ -1,12 +1,14 @@
 import { defineConfig } from "prisma/config";
-import { env } from "./src/utils/env";
+
+process.loadEnvFile(".env.local");
 
 export default defineConfig({
   schema: "prisma/schema.prisma",
   migrations: {
     path: "prisma/migrations",
+    seed: "tsx prisma/seed/index.ts",
   },
   datasource: {
-    url: env.DATABASE_URL,
+    url: process.env.DATABASE_URL,
   },
 });

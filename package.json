@@ -6,7 +6,6 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "prisma": "node --env-file=.env.local ./node_modules/.bin/prisma",
     "start": "next start",
     "lint": "biome check",
     "format": "biome format --write",
@@ -31,6 +30,7 @@
     "@biomejs/biome": "2.2.0",
     "@faker-js/faker": "^10.3.0",
     "@playwright/test": "^1.58.2",
+    "@snaplet/copycat": "^6.0.0",
     "@tailwindcss/postcss": "^4",
     "@tanstack/react-devtools": "^0.9.6",
     "@tanstack/react-form-devtools": "^0.2.16",
@@ -45,6 +45,7 @@
     "prisma": "^7.4.0",
     "supabase": "^2.76.9",
     "tailwindcss": "^4",
+    "tsx": "^4.21.0",
     "typescript": "^5",
     "vite-tsconfig-paths": "^6.1.1",
     "vitest": "^4.0.18"

@@ -24,7 +24,7 @@ pnpm build             # Production build
 pnpm start             # Start production server
 pnpm lint              # Run Biome check (lint + format check)
 pnpm format            # Auto-fix formatting with Biome
-pnpm prisma <cmd>      # Run Prisma CLI with .env.local injected
+npx prisma <cmd>       # Run Prisma CLI (.env.local loaded via prisma.config.ts)
 pnpm test              # Run Vitest (single run)
 pnpm test:watch        # Run Vitest in watch mode
 pnpm test:integration  # Run Playwright integration tests
@@ -129,6 +129,12 @@ pnpm test:integration  # Run Playwright integration tests
 - DaisyUI v5: `btn`, `card`, `card-body`, `fieldset`, `input`, `alert`, `loading`, etc.
 - Dark mode via `prefers-color-scheme` and CSS variables
 - Fonts: `--font-geist-sans`, `--font-geist-mono`
+
+---
+
+## File Size
+
+Prefer many small, focused files over few large ones. Each file should have a single clear responsibility. When a file grows to handle multiple concerns, split it — one function or one data set per file is a reasonable target.
 
 ---
 
