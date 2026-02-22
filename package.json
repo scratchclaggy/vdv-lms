@@ -41,6 +41,7 @@
     "@vitejs/plugin-react": "^5.1.4",
     "babel-plugin-react-compiler": "1.0.0",
     "daisyui": "^5.5.19",
+    "lefthook": "^2.1.1",
     "prisma": "^7.4.0",
     "supabase": "^2.76.9",
     "tailwindcss": "^4",

@@ -1,0 +1,11 @@
+pre-commit:
+  commands:
+    lint:
+      glob: "*.{ts,tsx,js,jsx,json}"
+      run: pnpm biome check --write {staged_files}
+      stage_fixed: true
+
+pre-push:
+  commands:
+    test:
+      run: pnpm test
