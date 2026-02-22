@@ -1,11 +1,12 @@
 import { defineConfig } from "@playwright/test";
 
-// Load .env.local so DATABASE_URL, SUPABASE_SERVICE_ROLE_KEY, etc. are
-// available to the global setup and test fixtures.
-process.loadEnvFile(".env.local");
+// Load .env.test.local so integration tests run against the isolated test
+// database (postgres_test) rather than the development database.
+process.loadEnvFile(".env.test.local");
 
 export default defineConfig({
   testDir: "integration-tests",
+  globalSetup: "./integration-tests/global-setup.ts",
   globalTeardown: "./integration-tests/global-teardown.ts",
   // Run integration test files serially — they share one DB and truncate
   // between tests.
