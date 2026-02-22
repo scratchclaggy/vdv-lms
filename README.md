@@ -1,36 +1,78 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# VDV LMS
+
+## Overview
+
+This is a mock learning management system (LMS) to serve as a basic portfolio piece. The LMS allows students to create consultations with tutors, view their upcoming consultations, and mark consultations complete/incomplete.
+
+## Tech Stack
+
+- Next.js 16 (App Router, React 19, React Compiler)
+- PostgreSQL with Prisma v7 (pg adapter)
+- Supabase Auth (@supabase/ssr)
+- Tailwind CSS v4 + DaisyUI v5
+- TanStack Form + Zod v4
+- Biome (lint/format)
+- Lefthook (git hooks)
+- Vitest (unit tests) + Playwright (integration tests)
 
 ## Getting Started
 
-First, run the development server:
+1. Install dependencies `pnpm install`
+2. Create a local env file `cp .env.example .env.local`
+3. Start Supabase `pnpm supabase start`
+4. Update `.env.local` with the keys provided by the `pnpm supabase start` command (or use `pnpm supabase status` to see them again)
+5. Run database migrations `pnpm prisma migrate deploy`
+6. Seed sample data `pnpm prisma db seed` — all seed accounts use the password `some password` (e.g. `david@student.com`)
+7. Run the application with `pnpm run dev`
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### Optional
+
+To run integration tests you will need to populate a `.env.test.local`. It can be identical to `.env.local` but it is highly recommended that you choose a different postgres instance (e.g. `postgresql://postgres:postgres@127.0.0.1:54322/postgres_test`).
+
+### Links
+
+- Website: [http://localhost:3000](http://localhost:3000)
+- Supabase Studio: [http://localhost:54323](http://localhost:54323)
+
+## Data model
+
+We are keeping this _very_ simple for demonstration purposes.
+
+```
+    ┌─────────┐          ┌──────────────┐          ┌─────────┐
+    │  Tutor  │1        *│ Consultation │*        1│ Student │
+    │         ├──────────┤              ├──────────┤         │
+    └─────────┘          └──────────────┘          └─────────┘
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+- The schema is intentionally minimal — no subjects, no availability windows, no scheduling rules
+- Students can schedule a consultation with a tutor
+- Consultations belong to a student and a tutor
+- Both Student.id and Tutor.id are UUIDs sourced from Supabase auth (they match the auth user's UUID)
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Considerations
 
-## Learn More
+- So far only student user stories are implemented. Some basic provisions for tutors exist but are predominantly out of scope.
+- When students sign-up as an 'auth' user (via Supabase) they are also onboarded as a student. Future feature work could include either an admin view or API to handle tutor onboarding.
+- If the DB insert fails during signup, the Supabase auth user is deleted to avoid orphaned accounts.
+- The consultation only considers PENDING / COMPLETED — no CANCELLED or other status.
+- Currently local only for demonstration purposes
 
-To learn more about Next.js, take a look at the following resources:
+## Security
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+- All API routes require a user session, enforced via a Next.js proxy and the Supabase setup recommended in their documentation
+- Resource access is checked based on DB state (e.g. a student can only access their own consultations)
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+## API Routes
 
-## Deploy on Vercel
+| Method | Path | Description |
+|---|---|---|
+| `POST` | `/api/auth/login` | Sign in |
+| `POST` | `/api/auth/sign-up` | Register a new student |
+| `GET` | `/api/consultations` | List consultations for the authenticated user |
+| `POST` | `/api/consultations` | Create a consultation |
+| `PATCH` | `/api/consultations/:id` | Update consultation status (`PENDING` \| `COMPLETED`) |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Note that the API routes are not currently accessed via application code. They were included to allow for 'black box' integration testing via playwright, and serve as a potential feature mobile clients or other services could interact with the service. The thinking here is that the API handlers are very thin, mostly concerned with passing the payload to a server action and returning an http response based on the action's return value.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
