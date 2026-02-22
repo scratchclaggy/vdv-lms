@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import type { Consultation, Student, Tutor } from "@/generated/prisma/client";
+import { ConsultationStatus } from "@/generated/prisma/enums";
 import { StudentBuilder } from "./student-builder";
 import { TutorBuilder } from "./tutor-builder";
 
@@ -13,6 +14,7 @@ export class ConsultationBuilder {
   private reason = faker.lorem.sentence();
   private startTime = faker.date.future();
   private endTime = new Date(this.startTime.getTime() + 60 * 60 * 1000);
+  private status: ConsultationStatus = ConsultationStatus.PENDING;
   private createdAt = new Date();
   private updatedAt = new Date();
   private tutor = new TutorBuilder().db();
@@ -35,6 +37,11 @@ export class ConsultationBuilder {
 
   withEndTime(endTime: Date): this {
     this.endTime = endTime;
+    return this;
+  }
+
+  withStatus(status: ConsultationStatus): this {
+    this.status = status;
     return this;
   }
 
@@ -72,6 +79,7 @@ export class ConsultationBuilder {
       reason: this.reason,
       startTime: this.startTime,
       endTime: this.endTime,
+      status: this.status,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,
       tutorId: this.tutor.id,

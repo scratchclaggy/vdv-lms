@@ -4,13 +4,14 @@ import { getNextConsultationAction } from "@/app/consultations/get-next-consulta
 import type { ConsultationWithRelations } from "@/app/consultations/types";
 import { ConsultationsList } from "@/app/dashboard/consultations-list";
 import { DateRangePicker } from "@/app/dashboard/date-range-picker";
+import { HideCompletedToggle } from "@/app/dashboard/hide-completed-toggle";
 import { getDisplayName, NavBar } from "@/app/dashboard/nav-bar";
 import { NextConsultationCard } from "@/app/dashboard/next-consultation-card";
 import { getCurrentUser } from "@/utils/auth";
 import { UnauthorizedError } from "@/utils/errors";
 
 type Props = {
-  searchParams: Promise<{ from?: string; to?: string }>;
+  searchParams: Promise<{ from?: string; to?: string; hideCompleted?: string }>;
 };
 
 export default async function Home({ searchParams }: Props) {
@@ -19,13 +20,15 @@ export default async function Home({ searchParams }: Props) {
     redirect("/login");
   }
 
-  const { from, to } = await searchParams;
+  const { from, to, hideCompleted } = await searchParams;
+
+  const shouldHideCompleted = hideCompleted !== "false";
 
   let consultations: ConsultationWithRelations[];
   let nextConsultation: ConsultationWithRelations | null;
   try {
     [consultations, nextConsultation] = await Promise.all([
-      getConsultationsAction(from, to),
+      getConsultationsAction(from, to, shouldHideCompleted),
       getNextConsultationAction(),
     ]);
   } catch (error) {
@@ -54,7 +57,10 @@ export default async function Home({ searchParams }: Props) {
             <h2 className="text-sm font-semibold uppercase tracking-wide text-base-content/50">
               All Consultations
             </h2>
-            <DateRangePicker />
+            <div className="flex items-center gap-3">
+              <HideCompletedToggle hideCompleted={shouldHideCompleted} />
+              <DateRangePicker />
+            </div>
           </div>
           <div className="card bg-base-100 border border-base-300">
             <div className="card-body py-2 px-5">

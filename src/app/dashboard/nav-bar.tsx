@@ -1,4 +1,6 @@
+import { ArrowRightStartOnRectangleIcon } from "@heroicons/react/24/outline";
 import type { User } from "@supabase/supabase-js";
+import { logoutAction } from "@/app/auth/logout";
 
 type Props = {
   user: User;
@@ -53,10 +55,22 @@ export function NavBar({ user }: Props) {
       <span className="text-xl font-semibold tracking-tight text-primary">
         VDV LMS
       </span>
-      <div className="avatar avatar-placeholder">
-        <div className="bg-secondary text-secondary-content rounded-full w-9">
-          <span className="text-sm font-medium">{initials}</span>
+      <div className="flex items-center gap-2">
+        <div className="avatar avatar-placeholder">
+          <div className="bg-secondary text-secondary-content rounded-full w-9">
+            <span className="text-sm font-medium">{initials}</span>
+          </div>
         </div>
+        <form action={logoutAction}>
+          <button
+            type="submit"
+            className="btn btn-ghost btn-square btn-sm"
+            aria-label="Log out"
+            title="Log out"
+          >
+            <ArrowRightStartOnRectangleIcon className="size-5 text-base-content/60" />
+          </button>
+        </form>
       </div>
     </header>
   );

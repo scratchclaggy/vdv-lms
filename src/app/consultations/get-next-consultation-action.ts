@@ -15,6 +15,7 @@ export async function getNextConsultationAction(): Promise<ConsultationWithRelat
     where: {
       OR: [{ studentId: authUser.id }, { tutorId: authUser.id }],
       startTime: { gte: new Date() },
+      status: "PENDING",
     },
     include: {
       tutor: true,

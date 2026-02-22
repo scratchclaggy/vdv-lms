@@ -8,6 +8,7 @@ import type { ConsultationWithRelations } from "./types";
 export async function getConsultationsAction(
   from?: string,
   to?: string,
+  hideCompleted?: boolean,
 ): Promise<ConsultationWithRelations[]> {
   const authUser = await getCurrentUser();
   if (!authUser) {
@@ -21,6 +22,7 @@ export async function getConsultationsAction(
         gte: from ? new Date(from) : new Date(),
         lte: to ? new Date(to) : undefined,
       },
+      ...(hideCompleted ? { status: { not: "COMPLETED" } } : {}),
     },
     include: {
       tutor: true,

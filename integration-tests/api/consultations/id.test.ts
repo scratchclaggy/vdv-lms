@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { expect, test } from "@playwright/test";
+import { ConsultationStatus } from "@/generated/prisma/enums";
 import { signupUser } from "@/test/api-helpers";
 import { ConsultationBuilder } from "@/test/builders/consultation-builder";
 import { StudentBuilder } from "@/test/builders/student-builder";
@@ -9,6 +10,237 @@ import { deleteAuthUser, truncateTables } from "@/test/db-helpers";
 import { db } from "@/test/integration-db";
 
 test.afterEach(truncateTables);
+
+test.describe("PATCH /api/consultations/[id]", () => {
+  test("returns 401 when unauthenticated", async ({ request }) => {
+    const id = faker.string.uuid();
+    const response = await request.patch(`/api/consultations/${id}`, {
+      data: { status: "COMPLETED" },
+    });
+    expect(response.status()).toBe(401);
+  });
+
+  test("returns 400 when the payload is malformed", async ({ request }) => {
+    const user = await signupUser(request);
+    try {
+      const id = faker.string.uuid();
+      const response = await request.patch(`/api/consultations/${id}`, {
+        data: { status: "INVALID_STATUS" },
+      });
+      expect(response.status()).toBe(400);
+      const body = await response.json();
+      expect(body).toEqual({ error: "Malformed payload" });
+    } finally {
+      await deleteAuthUser(user.id);
+    }
+  });
+
+  test("returns 404 when the consultation does not exist", async ({
+    request,
+  }) => {
+    const user = await signupUser(request);
+    try {
+      const id = faker.string.uuid();
+      const response = await request.patch(`/api/consultations/${id}`, {
+        data: { status: "COMPLETED" },
+      });
+      expect(response.status()).toBe(404);
+      const body = await response.json();
+      expect(body).toEqual({ error: "Consultation not found" });
+    } finally {
+      await deleteAuthUser(user.id);
+    }
+  });
+
+  test("updates status to COMPLETED when called by the tutor", async ({
+    request,
+  }) => {
+    const user = await signupUser(request);
+    try {
+      await db.tutor.create({
+        data: new TutorBuilder().withId(user.id).db(),
+      });
+      const student = await db.student.create({
+        data: new StudentBuilder().db(),
+      });
+
+      const future = daysFromNow(7);
+      const consultation = await db.consultation.create({
+        data: new ConsultationBuilder()
+          .withTutor((b) => b.withId(user.id))
+          .withStudent((b) => b.withId(student.id))
+          .withStartTime(future)
+          .withEndTime(new Date(future.getTime() + 60 * 60 * 1000))
+          .db(),
+      });
+
+      const response = await request.patch(
+        `/api/consultations/${consultation.id}`,
+        { data: { status: "COMPLETED" } },
+      );
+
+      expect(response.status()).toBe(200);
+      const body = await response.json();
+      expect(body).toMatchObject({
+        id: consultation.id,
+        status: "COMPLETED",
+      });
+    } finally {
+      await deleteAuthUser(user.id);
+    }
+  });
+
+  test("updates status to COMPLETED when called by the student", async ({
+    request,
+  }) => {
+    const user = await signupUser(request);
+    try {
+      const tutor = await db.tutor.create({
+        data: new TutorBuilder().db(),
+      });
+
+      const future = daysFromNow(7);
+      const consultation = await db.consultation.create({
+        data: new ConsultationBuilder()
+          .withTutor((b) => b.withId(tutor.id))
+          .withStudent((b) => b.withId(user.id))
+          .withStartTime(future)
+          .withEndTime(new Date(future.getTime() + 60 * 60 * 1000))
+          .db(),
+      });
+
+      const response = await request.patch(
+        `/api/consultations/${consultation.id}`,
+        { data: { status: "COMPLETED" } },
+      );
+
+      expect(response.status()).toBe(200);
+      const body = await response.json();
+      expect(body).toMatchObject({
+        id: consultation.id,
+        status: "COMPLETED",
+        tutorId: tutor.id,
+        studentId: user.id,
+      });
+      expect(body.tutor.id).toBe(tutor.id);
+      expect(body.student.id).toBe(user.id);
+    } finally {
+      await deleteAuthUser(user.id);
+    }
+  });
+
+  test("updates status to PENDING when called by the tutor (mark pending)", async ({
+    request,
+  }) => {
+    const user = await signupUser(request);
+    try {
+      await db.tutor.create({
+        data: new TutorBuilder().withId(user.id).db(),
+      });
+      const student = await db.student.create({
+        data: new StudentBuilder().db(),
+      });
+
+      const future = daysFromNow(7);
+      const consultation = await db.consultation.create({
+        data: new ConsultationBuilder()
+          .withTutor((b) => b.withId(user.id))
+          .withStudent((b) => b.withId(student.id))
+          .withStartTime(future)
+          .withEndTime(new Date(future.getTime() + 60 * 60 * 1000))
+          .withStatus(ConsultationStatus.COMPLETED)
+          .db(),
+      });
+
+      const response = await request.patch(
+        `/api/consultations/${consultation.id}`,
+        { data: { status: "PENDING" } },
+      );
+
+      expect(response.status()).toBe(200);
+      const body = await response.json();
+      expect(body).toMatchObject({
+        id: consultation.id,
+        status: "PENDING",
+      });
+    } finally {
+      await deleteAuthUser(user.id);
+    }
+  });
+
+  test("updates status to PENDING when called by the student (mark pending)", async ({
+    request,
+  }) => {
+    const user = await signupUser(request);
+    try {
+      const tutor = await db.tutor.create({
+        data: new TutorBuilder().db(),
+      });
+
+      const future = daysFromNow(7);
+      const consultation = await db.consultation.create({
+        data: new ConsultationBuilder()
+          .withTutor((b) => b.withId(tutor.id))
+          .withStudent((b) => b.withId(user.id))
+          .withStartTime(future)
+          .withEndTime(new Date(future.getTime() + 60 * 60 * 1000))
+          .withStatus(ConsultationStatus.COMPLETED)
+          .db(),
+      });
+
+      const response = await request.patch(
+        `/api/consultations/${consultation.id}`,
+        { data: { status: "PENDING" } },
+      );
+
+      expect(response.status()).toBe(200);
+      const body = await response.json();
+      expect(body).toMatchObject({
+        id: consultation.id,
+        status: "PENDING",
+        tutorId: tutor.id,
+        studentId: user.id,
+      });
+    } finally {
+      await deleteAuthUser(user.id);
+    }
+  });
+
+  test("returns 403 when the caller is unrelated to the consultation", async ({
+    request,
+  }) => {
+    const stranger = await signupUser(request);
+    try {
+      const tutor = await db.tutor.create({
+        data: new TutorBuilder().db(),
+      });
+      const student = await db.student.create({
+        data: new StudentBuilder().db(),
+      });
+
+      const future = daysFromNow(7);
+      const consultation = await db.consultation.create({
+        data: new ConsultationBuilder()
+          .withTutor((b) => b.withId(tutor.id))
+          .withStudent((b) => b.withId(student.id))
+          .withStartTime(future)
+          .withEndTime(new Date(future.getTime() + 60 * 60 * 1000))
+          .db(),
+      });
+
+      const response = await request.patch(
+        `/api/consultations/${consultation.id}`,
+        { data: { status: "COMPLETED" } },
+      );
+
+      expect(response.status()).toBe(403);
+      const body = await response.json();
+      expect(body).toEqual({ error: "Forbidden" });
+    } finally {
+      await deleteAuthUser(stranger.id);
+    }
+  });
+});
 
 test.describe("GET /api/consultations/[id]", () => {
   test("returns 401 when unauthenticated", async ({ request }) => {
