@@ -1,3 +1,6 @@
+-- CreateEnum
+CREATE TYPE "ConsultationStatus" AS ENUM ('PENDING', 'COMPLETED');
+
 -- CreateTable
 CREATE TABLE "Tutor" (
     "id" UUID NOT NULL,
@@ -24,10 +27,10 @@ CREATE TABLE "Student" (
 
 -- CreateTable
 CREATE TABLE "Consultation" (
-    "id" TEXT NOT NULL,
+    "id" UUID NOT NULL DEFAULT gen_random_uuid(),
     "reason" TEXT NOT NULL,
     "startTime" TIMESTAMP(3) NOT NULL,
-    "endTime" TIMESTAMP(3) NOT NULL,
+    "status" "ConsultationStatus" NOT NULL DEFAULT 'PENDING',
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
     "tutorId" UUID NOT NULL,

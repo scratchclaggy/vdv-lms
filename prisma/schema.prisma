@@ -35,10 +35,9 @@ enum ConsultationStatus {
 }
 
 model Consultation {
-  id        String             @id @default(uuid())
+  id        String             @id @default(uuid()) @db.Uuid
   reason    String
   startTime DateTime
-  endTime   DateTime
   status    ConsultationStatus @default(PENDING)
   createdAt DateTime           @default(now())
   updatedAt DateTime           @updatedAt

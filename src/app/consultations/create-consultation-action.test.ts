@@ -5,7 +5,6 @@ import { ConsultationBuilder } from "@/test/builders/consultation-builder";
 import { TutorBuilder } from "@/test/builders/tutor-builder";
 import { makeAuthUser } from "@/test/route-helpers";
 import { getCurrentUser } from "@/utils/auth";
-import { ForbiddenError, UnauthorizedError } from "@/utils/errors";
 import { createConsultationAction } from "./create-consultation-action";
 
 vi.mock("@/db", () => ({
@@ -21,37 +20,36 @@ describe("createConsultationAction", () => {
     vi.resetAllMocks();
   });
 
-  it("throws UnauthorizedError when unauthenticated", async () => {
+  it("returns an unauthorized error when unauthenticated", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue(null);
 
     const consultation = new ConsultationBuilder().build();
-    await expect(
-      createConsultationAction({
-        tutorId: consultation.tutorId,
-        studentId: consultation.studentId,
-        reason: consultation.reason,
-        startTime: consultation.startTime.toISOString(),
-        endTime: consultation.endTime.toISOString(),
-      }),
-    ).rejects.toThrow(UnauthorizedError);
+    const result = await createConsultationAction({
+      tutorId: consultation.tutorId,
+      studentId: consultation.studentId,
+      reason: consultation.reason,
+      startTime: consultation.startTime.toISOString(),
+    });
+
+    expect(result).toEqual({ error: "You must be logged in", status: 401 });
   });
 
-  it("throws ForbiddenError when the user is neither the student nor the tutor", async () => {
+  it("returns a forbidden error when the user is neither the student nor the tutor", async () => {
     vi.mocked(getCurrentUser).mockResolvedValue(
       makeAuthUser(faker.string.uuid()),
     );
 
     const consultation = new ConsultationBuilder().build();
-    await expect(
-      createConsultationAction({
-        tutorId: consultation.tutorId,
-        studentId: consultation.studentId,
-        reason: consultation.reason,
-        startTime: consultation.startTime.toISOString(),
-        endTime: consultation.endTime.toISOString(),
-      }),
-    ).rejects.toThrow(ForbiddenError);
+    const result = await createConsultationAction({
+      tutorId: consultation.tutorId,
+      studentId: consultation.studentId,
+      reason: consultation.reason,
+      startTime: consultation.startTime.toISOString(),
+    });
 
+    expect(result).toEqual(
+      expect.objectContaining({ error: expect.any(String) }),
+    );
     expect(prisma.consultation.create).not.toHaveBeenCalled();
   });
 
@@ -79,10 +77,10 @@ describe("createConsultationAction", () => {
       studentId: consultation.studentId,
       reason: consultation.reason,
       startTime: consultation.startTime.toISOString(),
-      endTime: consultation.endTime.toISOString(),
     });
 
-    expect(result.student.id).toBe(studentId);
+    if ("error" in result) throw new Error("Expected consultation, got error");
+    expect(result.data.student.id).toBe(studentId);
     expect(prisma.consultation.create).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({ tutorId, studentId, reason }),
@@ -114,13 +112,13 @@ describe("createConsultationAction", () => {
       studentId: consultation.studentId,
       reason: consultation.reason,
       startTime: consultation.startTime.toISOString(),
-      endTime: consultation.endTime.toISOString(),
     });
 
-    expect(result.tutor.id).toBe(tutorId);
+    if ("error" in result) throw new Error("Expected consultation, got error");
+    expect(result.data.tutor.id).toBe(tutorId);
   });
 
-  it("throws ForbiddenError when the tutor has no Tutor record", async () => {
+  it("returns a forbidden error when the tutor has no Tutor record", async () => {
     const tutorId = faker.string.uuid();
     const studentId = faker.string.uuid();
     vi.mocked(getCurrentUser).mockResolvedValue(makeAuthUser(tutorId));
@@ -131,16 +129,16 @@ describe("createConsultationAction", () => {
       .withStudent((b) => b.withId(studentId))
       .build();
 
-    await expect(
-      createConsultationAction({
-        tutorId: consultation.tutorId,
-        studentId: consultation.studentId,
-        reason: consultation.reason,
-        startTime: consultation.startTime.toISOString(),
-        endTime: consultation.endTime.toISOString(),
-      }),
-    ).rejects.toThrow(ForbiddenError);
+    const result = await createConsultationAction({
+      tutorId: consultation.tutorId,
+      studentId: consultation.studentId,
+      reason: consultation.reason,
+      startTime: consultation.startTime.toISOString(),
+    });
 
+    expect(result).toEqual(
+      expect.objectContaining({ error: expect.any(String) }),
+    );
     expect(prisma.consultation.create).not.toHaveBeenCalled();
   });
 
@@ -161,7 +159,6 @@ describe("createConsultationAction", () => {
         studentId: consultation.studentId,
         reason: consultation.reason,
         startTime: consultation.startTime.toISOString(),
-        endTime: consultation.endTime.toISOString(),
       }),
     ).rejects.toThrow("DB error");
   });

@@ -1,6 +1,7 @@
 "use client";
 
 import { useFieldContext } from "./form-context";
+import { type FormError, getErrorMessage } from "./get-error-message";
 
 interface SelectOption {
   value: string;
@@ -42,7 +43,7 @@ export function SelectField({ label, options, placeholder }: SelectFieldProps) {
       </select>
       {hasError && (
         <p className="fieldset-label text-error">
-          {String(field.state.meta.errors[0])}
+          {getErrorMessage(field.state.meta.errors[0] as FormError)}
         </p>
       )}
     </fieldset>

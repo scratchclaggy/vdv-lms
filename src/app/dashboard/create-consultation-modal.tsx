@@ -2,7 +2,6 @@
 
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { getTomorrowDate } from "@/app/consultations/get-tomorrow-date";
 import type { Tutor } from "@/app/consultations/get-tutors-action";
 import { CreateConsultationForm } from "@/app/dashboard/create-consultation-form";
 
@@ -31,7 +30,12 @@ export function ScheduleConsultationButton({ currentUserId, tutors }: Props) {
   }, []);
 
   function open() {
-    setDefaultDate(getTomorrowDate());
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const yyyy = tomorrow.getFullYear();
+    const mm = String(tomorrow.getMonth() + 1).padStart(2, "0");
+    const dd = String(tomorrow.getDate()).padStart(2, "0");
+    setDefaultDate(`${yyyy}-${mm}-${dd}`);
     dialogRef.current?.showModal();
   }
 

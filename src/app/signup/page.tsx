@@ -5,6 +5,7 @@ import { useState } from "react";
 import { signupAction } from "@/app/auth/signup";
 import { signupSchema } from "@/app/auth/signup-schema";
 import { useAppForm } from "@/components/form/use-app-form";
+import { isActionError } from "@/utils/action-result";
 
 export default function SignupPage() {
   const [serverError, setServerError] = useState<string | null>(null);
@@ -17,10 +18,13 @@ export default function SignupPage() {
       password: "",
       confirmPassword: "",
     },
+    validators: {
+      onChange: signupSchema,
+    },
     onSubmit: async ({ value }) => {
       setServerError(null);
       const result = await signupAction(value);
-      if (result?.error) {
+      if (isActionError(result)) {
         setServerError(result.error);
       }
     },
@@ -47,18 +51,7 @@ export default function SignupPage() {
           >
             <form.AppForm>
               <div className="flex gap-3">
-                <form.AppField
-                  name="firstName"
-                  validators={{
-                    onChange: ({ value }) => {
-                      const result =
-                        signupSchema.shape.firstName.safeParse(value);
-                      return result.success
-                        ? undefined
-                        : result.error.issues[0]?.message;
-                    },
-                  }}
-                >
+                <form.AppField name="firstName">
                   {(field) => (
                     <div className="flex-1">
                       <field.TextField
@@ -70,18 +63,7 @@ export default function SignupPage() {
                   )}
                 </form.AppField>
 
-                <form.AppField
-                  name="lastName"
-                  validators={{
-                    onChange: ({ value }) => {
-                      const result =
-                        signupSchema.shape.lastName.safeParse(value);
-                      return result.success
-                        ? undefined
-                        : result.error.issues[0]?.message;
-                    },
-                  }}
-                >
+                <form.AppField name="lastName">
                   {(field) => (
                     <div className="flex-1">
                       <field.TextField
@@ -94,17 +76,7 @@ export default function SignupPage() {
                 </form.AppField>
               </div>
 
-              <form.AppField
-                name="email"
-                validators={{
-                  onChange: ({ value }) => {
-                    const result = signupSchema.shape.email.safeParse(value);
-                    return result.success
-                      ? undefined
-                      : result.error.issues[0]?.message;
-                  },
-                }}
-              >
+              <form.AppField name="email">
                 {(field) => (
                   <field.TextField
                     label="Email"
@@ -115,17 +87,7 @@ export default function SignupPage() {
                 )}
               </form.AppField>
 
-              <form.AppField
-                name="password"
-                validators={{
-                  onChange: ({ value }) => {
-                    const result = signupSchema.shape.password.safeParse(value);
-                    return result.success
-                      ? undefined
-                      : result.error.issues[0]?.message;
-                  },
-                }}
-              >
+              <form.AppField name="password">
                 {(field) => (
                   <field.PasswordField
                     label="Password"
@@ -134,17 +96,7 @@ export default function SignupPage() {
                 )}
               </form.AppField>
 
-              <form.AppField
-                name="confirmPassword"
-                validators={{
-                  onChangeListenTo: ["password"],
-                  onChange: ({ value, fieldApi }) => {
-                    const password = fieldApi.form.getFieldValue("password");
-                    if (!value) return "Please confirm your password";
-                    if (value !== password) return "Passwords do not match";
-                  },
-                }}
-              >
+              <form.AppField name="confirmPassword">
                 {(field) => (
                   <field.PasswordField
                     label="Confirm password"

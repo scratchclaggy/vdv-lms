@@ -70,7 +70,6 @@ test.describe("PATCH /api/consultations/[id]", () => {
           .withTutor((b) => b.withId(user.id))
           .withStudent((b) => b.withId(student.id))
           .withStartTime(future)
-          .withEndTime(new Date(future.getTime() + 60 * 60 * 1000))
           .db(),
       });
 
@@ -105,7 +104,6 @@ test.describe("PATCH /api/consultations/[id]", () => {
           .withTutor((b) => b.withId(tutor.id))
           .withStudent((b) => b.withId(user.id))
           .withStartTime(future)
-          .withEndTime(new Date(future.getTime() + 60 * 60 * 1000))
           .db(),
       });
 
@@ -147,7 +145,6 @@ test.describe("PATCH /api/consultations/[id]", () => {
           .withTutor((b) => b.withId(user.id))
           .withStudent((b) => b.withId(student.id))
           .withStartTime(future)
-          .withEndTime(new Date(future.getTime() + 60 * 60 * 1000))
           .withStatus(ConsultationStatus.COMPLETED)
           .db(),
       });
@@ -183,7 +180,6 @@ test.describe("PATCH /api/consultations/[id]", () => {
           .withTutor((b) => b.withId(tutor.id))
           .withStudent((b) => b.withId(user.id))
           .withStartTime(future)
-          .withEndTime(new Date(future.getTime() + 60 * 60 * 1000))
           .withStatus(ConsultationStatus.COMPLETED)
           .db(),
       });
@@ -224,7 +220,6 @@ test.describe("PATCH /api/consultations/[id]", () => {
           .withTutor((b) => b.withId(tutor.id))
           .withStudent((b) => b.withId(student.id))
           .withStartTime(future)
-          .withEndTime(new Date(future.getTime() + 60 * 60 * 1000))
           .db(),
       });
 

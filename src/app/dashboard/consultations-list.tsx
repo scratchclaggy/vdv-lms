@@ -1,5 +1,5 @@
 import type { ConsultationWithRelations } from "@/app/consultations/types";
-import { formatTimeRange } from "@/utils/format-time-range";
+import { formatTime } from "@/utils/format-time";
 import { ConsultationStatusToggle } from "./consultation-status-toggle";
 
 type Props = {
@@ -20,7 +20,6 @@ export function ConsultationsList({ consultations }: Props) {
     <ul className="divide-y divide-base-300">
       {consultations.map((c) => {
         const start = new Date(c.startTime);
-        const end = new Date(c.endTime);
 
         const dateLabel = start.toLocaleDateString(undefined, {
           weekday: "short",
@@ -29,7 +28,7 @@ export function ConsultationsList({ consultations }: Props) {
           year: "numeric",
         });
 
-        const timeLabel = formatTimeRange(start, end);
+        const timeLabel = formatTime(start);
 
         const tutorName = `${c.tutor.firstName} ${c.tutor.lastName}`;
 

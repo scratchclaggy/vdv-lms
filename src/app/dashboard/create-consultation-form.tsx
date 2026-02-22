@@ -1,10 +1,11 @@
 "use client";
 
 import { useState } from "react";
-import { createConsultationFormAction } from "@/app/consultations/create-consultation-form-action";
+import { createConsultationAction } from "@/app/consultations/create-consultation-action";
 import { createConsultationSchema } from "@/app/consultations/create-consultation-schema";
 import type { Tutor } from "@/app/consultations/get-tutors-action";
 import { useAppForm } from "@/components/form/use-app-form";
+import { isActionError } from "@/utils/action-result";
 
 interface Props {
   currentUserId: string;
@@ -30,13 +31,24 @@ export function CreateConsultationForm({
       reason: "",
       date: defaultDate,
       startTime: "09:00",
-      endTime: "10:00",
-      timezoneOffset: new Date().getTimezoneOffset(),
+    },
+    validators: {
+      onChange: createConsultationSchema,
     },
     onSubmit: async ({ value }) => {
       setServerError(null);
-      const result = await createConsultationFormAction(value);
-      if (result?.error) {
+      // Convert local date + time to a UTC ISO string entirely client-side.
+      // new Date(`${date}T${time}`) is interpreted as local time by the browser.
+      const startTimeUtc = new Date(
+        `${value.date}T${value.startTime}`,
+      ).toISOString();
+      const result = await createConsultationAction({
+        tutorId: value.tutorId,
+        studentId: value.studentId,
+        reason: value.reason,
+        startTime: startTimeUtc,
+      });
+      if (isActionError(result)) {
         setServerError(result.error);
       } else {
         onSuccess();
@@ -65,18 +77,7 @@ export function CreateConsultationForm({
         className="flex flex-col gap-4"
       >
         <form.AppForm>
-          <form.AppField
-            name="tutorId"
-            validators={{
-              onChange: ({ value }) => {
-                const result =
-                  createConsultationSchema.shape.tutorId.safeParse(value);
-                return result.success
-                  ? undefined
-                  : result.error.issues[0]?.message;
-              },
-            }}
-          >
+          <form.AppField name="tutorId">
             {(field) => (
               <field.SelectField
                 label="Tutor"
@@ -86,19 +87,7 @@ export function CreateConsultationForm({
             )}
           </form.AppField>
 
-          <form.AppField
-            name="reason"
-            validators={{
-              onChange: ({ value }) => {
-                const result = createConsultationSchema.shape.reason.safeParse(
-                  value?.trim(),
-                );
-                return result.success
-                  ? undefined
-                  : result.error.issues[0]?.message;
-              },
-            }}
-          >
+          <form.AppField name="reason">
             {(field) => (
               <field.TextField
                 label="Reason"
@@ -107,78 +96,13 @@ export function CreateConsultationForm({
             )}
           </form.AppField>
 
-          <form.AppField
-            name="date"
-            validators={{
-              onChange: ({ value }) => {
-                const result =
-                  createConsultationSchema.shape.date.safeParse(value);
-                return result.success
-                  ? undefined
-                  : result.error.issues[0]?.message;
-              },
-            }}
-          >
+          <form.AppField name="date">
             {(field) => <field.DateField label="Date" />}
           </form.AppField>
 
-          <div className="grid grid-cols-2 gap-4">
-            <form.AppField
-              name="startTime"
-              validators={{
-                onChange: ({ value }) => {
-                  const result = createConsultationSchema.safeParse({
-                    ...form.state.values,
-                    startTime: value,
-                  });
-                  if (!result.success) {
-                    const issue = result.error.issues.find(
-                      (i) => i.path[0] === "startTime",
-                    );
-                    return issue?.message;
-                  }
-                },
-              }}
-              listeners={{
-                onChange: ({ value }) => {
-                  if (!value) return;
-                  const [hours, minutes] = value.split(":").map(Number);
-                  const totalMinutes = Math.min(
-                    hours * 60 + minutes + 60,
-                    18 * 60,
-                  );
-                  const endHours = Math.floor(totalMinutes / 60) % 24;
-                  const endMinutes = totalMinutes % 60;
-                  const endTime = `${String(endHours).padStart(2, "0")}:${String(endMinutes).padStart(2, "0")}`;
-                  form.setFieldValue("endTime", endTime, {
-                    dontUpdateMeta: true,
-                  });
-                },
-              }}
-            >
-              {(field) => <field.TimeField label="Start time" />}
-            </form.AppField>
-
-            <form.AppField
-              name="endTime"
-              validators={{
-                onChange: ({ value }) => {
-                  const result = createConsultationSchema.safeParse({
-                    ...form.state.values,
-                    endTime: value,
-                  });
-                  if (!result.success) {
-                    const issue = result.error.issues.find(
-                      (i) => i.path[0] === "endTime",
-                    );
-                    return issue?.message;
-                  }
-                },
-              }}
-            >
-              {(field) => <field.TimeField label="End time" />}
-            </form.AppField>
-          </div>
+          <form.AppField name="startTime">
+            {(field) => <field.TimeField label="Start time" />}
+          </form.AppField>
 
           <div className="modal-action mt-2">
             <button type="button" className="btn btn-ghost" onClick={onCancel}>

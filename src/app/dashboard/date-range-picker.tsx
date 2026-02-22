@@ -2,14 +2,21 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 
+function toLocalDateString(d: Date): string {
+  const yyyy = d.getFullYear();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
 function defaultFrom(): string {
-  return new Date().toISOString().slice(0, 10);
+  return toLocalDateString(new Date());
 }
 
 function defaultTo(): string {
   const d = new Date();
   d.setMonth(d.getMonth() + 1);
-  return d.toISOString().slice(0, 10);
+  return toLocalDateString(d);
 }
 
 export function DateRangePicker() {
@@ -26,9 +33,11 @@ export function DateRangePicker() {
     const params = new URLSearchParams(searchParams.toString());
     if (value) {
       if (key === "from") {
-        params.set("from", `${value}T00:00:00.000Z`);
+        // Interpret the date as local midnight and convert to UTC
+        params.set("from", new Date(`${value}T00:00:00`).toISOString());
       } else {
-        params.set("to", `${value}T23:59:59.999Z`);
+        // Interpret the date as local end-of-day and convert to UTC
+        params.set("to", new Date(`${value}T23:59:59.999`).toISOString());
       }
     } else {
       params.delete(key);

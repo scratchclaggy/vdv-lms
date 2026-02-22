@@ -37,13 +37,11 @@ test.describe("GET /api/consultations", () => {
             .withStudent((b) => b.withId(studentA.id))
             .withReason(reasonA)
             .withStartTime(future)
-            .withEndTime(new Date(future.getTime() + 60 * 60 * 1000))
             .db(),
           new ConsultationBuilder()
             .withTutor((b) => b.withId(tutor.id))
             .withStudent((b) => b.withId(studentB.id))
             .withStartTime(future)
-            .withEndTime(new Date(future.getTime() + 60 * 60 * 1000))
             .db(),
         ],
       });
@@ -81,7 +79,6 @@ test.describe("GET /api/consultations", () => {
             .withTutor((b) => b.withId(tutorUser.id))
             .withStudent((b) => b.withId(studentId))
             .withStartTime(future)
-            .withEndTime(new Date(future.getTime() + 60 * 60 * 1000))
             .db(),
         });
 
@@ -116,7 +113,6 @@ test.describe("GET /api/consultations", () => {
             .withTutor((b) => b.withId(tutorUser.id))
             .withStudent((b) => b.withId(studentId))
             .withStartTime(future)
-            .withEndTime(new Date(future.getTime() + 60 * 60 * 1000))
             .db(),
         });
 
@@ -153,14 +149,12 @@ test.describe("GET /api/consultations", () => {
             .withTutor((b) => b.withId(tutor.id))
             .withStudent((b) => b.withId(user.id))
             .withStartTime(past)
-            .withEndTime(new Date(past.getTime() + 60 * 60 * 1000))
             .db(),
           new ConsultationBuilder()
             .withTutor((b) => b.withId(tutor.id))
             .withStudent((b) => b.withId(user.id))
             .withReason(futureReason)
             .withStartTime(future)
-            .withEndTime(new Date(future.getTime() + 60 * 60 * 1000))
             .db(),
         ],
       });
@@ -192,20 +186,17 @@ test.describe("GET /api/consultations", () => {
             .withTutor((b) => b.withId(tutor.id))
             .withStudent((b) => b.withId(user.id))
             .withStartTime(before)
-            .withEndTime(new Date(before.getTime() + 60 * 60 * 1000))
             .db(),
           new ConsultationBuilder()
             .withTutor((b) => b.withId(tutor.id))
             .withStudent((b) => b.withId(user.id))
             .withReason(insideReason)
             .withStartTime(inside)
-            .withEndTime(new Date(inside.getTime() + 60 * 60 * 1000))
             .db(),
           new ConsultationBuilder()
             .withTutor((b) => b.withId(tutor.id))
             .withStudent((b) => b.withId(user.id))
             .withStartTime(after)
-            .withEndTime(new Date(after.getTime() + 60 * 60 * 1000))
             .db(),
         ],
       });
@@ -270,7 +261,6 @@ test.describe("POST /api/consultations", () => {
           studentId: student.id,
           reason: faker.lorem.sentence(),
           startTime: future.toISOString(),
-          endTime: new Date(future.getTime() + 60 * 60 * 1000).toISOString(),
         },
       });
       expect(response.status()).toBe(403);
@@ -301,7 +291,6 @@ test.describe("POST /api/consultations", () => {
           studentId: student.id,
           reason: faker.lorem.sentence(),
           startTime: future.toISOString(),
-          endTime: new Date(future.getTime() + 60 * 60 * 1000).toISOString(),
         },
       });
 
@@ -332,7 +321,6 @@ test.describe("POST /api/consultations", () => {
           studentId: user.id,
           reason,
           startTime: future.toISOString(),
-          endTime: new Date(future.getTime() + 60 * 60 * 1000).toISOString(),
         },
       });
 
@@ -373,7 +361,6 @@ test.describe("POST /api/consultations", () => {
           studentId: student.id,
           reason: faker.lorem.sentence(),
           startTime: future.toISOString(),
-          endTime: new Date(future.getTime() + 60 * 60 * 1000).toISOString(),
         },
       });
 

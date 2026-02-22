@@ -13,7 +13,6 @@ export class ConsultationBuilder {
   private id = faker.string.uuid();
   private reason = faker.lorem.sentence();
   private startTime = faker.date.future();
-  private endTime = new Date(this.startTime.getTime() + 60 * 60 * 1000);
   private status: ConsultationStatus = ConsultationStatus.PENDING;
   private createdAt = new Date();
   private updatedAt = new Date();
@@ -32,11 +31,6 @@ export class ConsultationBuilder {
 
   withStartTime(startTime: Date): this {
     this.startTime = startTime;
-    return this;
-  }
-
-  withEndTime(endTime: Date): this {
-    this.endTime = endTime;
     return this;
   }
 
@@ -78,7 +72,6 @@ export class ConsultationBuilder {
       id: this.id,
       reason: this.reason,
       startTime: this.startTime,
-      endTime: this.endTime,
       status: this.status,
       createdAt: this.createdAt,
       updatedAt: this.updatedAt,

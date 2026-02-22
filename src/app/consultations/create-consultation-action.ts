@@ -1,29 +1,34 @@
 "use server";
 
 import { prisma } from "@/db";
+import type { ActionResult } from "@/utils/action-result";
 import { getCurrentUser } from "@/utils/auth";
-import { ForbiddenError, UnauthorizedError } from "@/utils/errors";
+import {
+  type CreateConsultationActionInput,
+  createConsultationActionSchema,
+} from "./create-consultation-schema";
 import type { ConsultationWithRelations } from "./types";
 
-export async function createConsultationAction(data: {
-  tutorId: string;
-  studentId: string;
-  reason: string;
-  startTime: string;
-  endTime: string;
-}): Promise<ConsultationWithRelations> {
+export async function createConsultationAction(
+  data: CreateConsultationActionInput,
+): Promise<ActionResult<ConsultationWithRelations>> {
   const authUser = await getCurrentUser();
   if (!authUser) {
-    throw new UnauthorizedError();
+    return { error: "You must be logged in", status: 401 };
   }
 
-  const { tutorId, studentId, reason, startTime, endTime } = data;
+  const parsed = createConsultationActionSchema.safeParse(data);
+  if (!parsed.success) {
+    return { error: "Invalid input", status: 400 };
+  }
+
+  const { tutorId, studentId, reason, startTime } = parsed.data;
 
   const isStudent = authUser.id === studentId;
   const isTutor = authUser.id === tutorId;
 
   if (!isStudent && !isTutor) {
-    throw new ForbiddenError("Cannot create consultations for this user");
+    return { error: "Cannot create consultations for this user", status: 403 };
   }
 
   if (isTutor) {
@@ -31,14 +36,17 @@ export async function createConsultationAction(data: {
       where: { id: tutorId },
     });
     if (!tutorRecord) {
-      throw new ForbiddenError("Cannot create consultations for this user");
+      return {
+        error: "Cannot create consultations for this user",
+        status: 403,
+      };
     }
   }
 
   const consultation = await prisma.consultation.create({
-    data: { tutorId, studentId, reason, startTime, endTime },
+    data: { tutorId, studentId, reason, startTime },
     include: { tutor: true, student: true },
   });
 
-  return consultation;
+  return { data: consultation };
 }

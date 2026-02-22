@@ -2,6 +2,7 @@ import { type NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { createConsultationAction } from "@/app/consultations/create-consultation-action";
 import { getConsultationsAction } from "@/app/consultations/get-consultations-action";
+import { isActionError } from "@/utils/action-result";
 import { getCurrentUser } from "@/utils/auth";
 import { errorToResponse } from "@/utils/http-errors";
 
@@ -23,7 +24,6 @@ const createSchema = z.object({
   studentId: z.string(),
   reason: z.string(),
   startTime: z.iso.datetime(),
-  endTime: z.iso.datetime(),
 });
 
 export async function POST(request: NextRequest) {
@@ -39,8 +39,16 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Malformed payload" }, { status: 400 });
     }
 
-    const consultation = await createConsultationAction(validation.data);
-    return NextResponse.json(consultation, { status: 201 });
+    const result = await createConsultationAction(validation.data);
+
+    if (isActionError(result)) {
+      return NextResponse.json(
+        { error: result.error },
+        { status: result.status },
+      );
+    }
+
+    return NextResponse.json(result.data, { status: 201 });
   } catch (error) {
     return errorToResponse(error, "Failed to create consultation");
   }

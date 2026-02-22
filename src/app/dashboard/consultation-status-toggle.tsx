@@ -20,22 +20,48 @@ export function ConsultationStatusToggle({ consultationId, status }: Props) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
   const [confirming, setConfirming] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const isCompleted = status === ConsultationStatus.COMPLETED;
 
   function handleConfirm() {
     startTransition(async () => {
-      await updateConsultationStatusAction(
-        consultationId,
-        isCompleted ? ConsultationStatus.PENDING : ConsultationStatus.COMPLETED,
-      );
-      setConfirming(false);
-      router.refresh();
+      try {
+        await updateConsultationStatusAction(
+          consultationId,
+          isCompleted
+            ? ConsultationStatus.PENDING
+            : ConsultationStatus.COMPLETED,
+        );
+        setConfirming(false);
+        setError(null);
+        router.refresh();
+      } catch (_err) {
+        setConfirming(false);
+        setError("Failed to update status. Please try again.");
+      }
     });
   }
 
   if (isPending) {
     return <span className="loading loading-spinner loading-sm shrink-0" />;
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center gap-1 shrink-0">
+        <span role="alert" className="text-xs text-error" title={error}>
+          Update failed
+        </span>
+        <button
+          type="button"
+          className="btn btn-xs btn-ghost"
+          onClick={() => setError(null)}
+        >
+          Retry
+        </button>
+      </div>
+    );
   }
 
   if (confirming) {

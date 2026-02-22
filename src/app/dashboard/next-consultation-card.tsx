@@ -1,5 +1,5 @@
 import type { ConsultationWithRelations } from "@/app/consultations/types";
-import { formatTimeRange } from "@/utils/format-time-range";
+import { formatTime } from "@/utils/format-time";
 
 type Props = {
   consultation: ConsultationWithRelations | null;
@@ -19,7 +19,6 @@ export function NextConsultationCard({ consultation }: Props) {
   }
 
   const start = new Date(consultation.startTime);
-  const end = new Date(consultation.endTime);
 
   const dateLabel = start.toLocaleDateString(undefined, {
     weekday: "long",
@@ -28,7 +27,7 @@ export function NextConsultationCard({ consultation }: Props) {
     day: "numeric",
   });
 
-  const timeLabel = formatTimeRange(start, end);
+  const timeLabel = formatTime(start);
 
   const tutorName = `${consultation.tutor.firstName} ${consultation.tutor.lastName}`;
 

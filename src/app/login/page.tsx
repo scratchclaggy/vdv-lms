@@ -5,16 +5,20 @@ import { useState } from "react";
 import { loginAction } from "@/app/auth/login";
 import { loginSchema } from "@/app/auth/login-schema";
 import { useAppForm } from "@/components/form/use-app-form";
+import { isActionError } from "@/utils/action-result";
 
 export default function LoginPage() {
   const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useAppForm({
     defaultValues: { email: "", password: "" },
+    validators: {
+      onChange: loginSchema,
+    },
     onSubmit: async ({ value }) => {
       setServerError(null);
       const result = await loginAction(value);
-      if (result?.error) {
+      if (isActionError(result)) {
         setServerError(result.error);
       }
     },
@@ -40,17 +44,7 @@ export default function LoginPage() {
             className="flex flex-col gap-4"
           >
             <form.AppForm>
-              <form.AppField
-                name="email"
-                validators={{
-                  onChange: ({ value }) => {
-                    const result = loginSchema.shape.email.safeParse(value);
-                    return result.success
-                      ? undefined
-                      : result.error.issues[0]?.message;
-                  },
-                }}
-              >
+              <form.AppField name="email">
                 {(field) => (
                   <field.TextField
                     label="Email"
@@ -61,17 +55,7 @@ export default function LoginPage() {
                 )}
               </form.AppField>
 
-              <form.AppField
-                name="password"
-                validators={{
-                  onChange: ({ value }) => {
-                    const result = loginSchema.shape.password.safeParse(value);
-                    return result.success
-                      ? undefined
-                      : result.error.issues[0]?.message;
-                  },
-                }}
-              >
+              <form.AppField name="password">
                 {(field) => (
                   <field.PasswordField
                     label="Password"
