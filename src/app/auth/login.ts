@@ -42,8 +42,8 @@ export async function loginAction(_prev: unknown, formData: FormData) {
 
   if (error) {
     return {
-      errorMap: {},
-      errors: [error.message],
+      errorMap: { onServer: error.message },
+      errors: [],
       values: { email, password },
     };
   }

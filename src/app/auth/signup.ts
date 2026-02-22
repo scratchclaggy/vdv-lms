@@ -53,8 +53,8 @@ export async function signupAction(_prev: unknown, formData: FormData) {
 
   if (error) {
     return {
-      errorMap: {},
-      errors: [error.message],
+      errorMap: { onServer: error.message },
+      errors: [],
       values: { email, password, firstName, lastName, confirmPassword: "" },
     };
   }
@@ -62,8 +62,8 @@ export async function signupAction(_prev: unknown, formData: FormData) {
   const userId = data.user?.id;
   if (!userId) {
     return {
-      errorMap: {},
-      errors: ["Signup succeeded but no user was returned"],
+      errorMap: { onServer: "Signup succeeded but no user was returned" },
+      errors: [],
       values: { email, password, firstName, lastName, confirmPassword: "" },
     };
   }
@@ -71,8 +71,8 @@ export async function signupAction(_prev: unknown, formData: FormData) {
   const studentError = await createStudent(userId, email, firstName, lastName);
   if (studentError) {
     return {
-      errorMap: {},
-      errors: [studentError.error],
+      errorMap: { onServer: studentError.error },
+      errors: [],
       values: { email, password, firstName, lastName, confirmPassword: "" },
     };
   }
