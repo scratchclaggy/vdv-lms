@@ -1,80 +1,39 @@
 "use server";
 
-import {
-  createServerValidate,
-  ServerValidateError,
-} from "@tanstack/react-form-nextjs";
 import { redirect } from "next/navigation";
-import { z } from "zod";
+import { signupSchema } from "@/app/auth/signup-schema";
 import { createClient } from "@/supabase/server";
 import { createStudent } from "./create-student";
-import { signupFormOptions } from "./form-options";
+import type { SignupInput } from "./signup-schema";
 
-const signupSchema = z
-  .object({
-    email: z.email(),
-    password: z.string().min(8, "Password must be at least 8 characters"),
-    confirmPassword: z.string(),
-    firstName: z.string().min(1, "First name is required"),
-    lastName: z.string().min(1, "Last name is required"),
-  })
-  .refine((data) => data.password === data.confirmPassword, {
-    message: "Passwords do not match",
-    path: ["confirmPassword"],
-  });
-
-const serverValidateSignup = createServerValidate({
-  ...signupFormOptions,
-  onServerValidate: ({ value }) => {
-    const result = signupSchema.safeParse(value);
-    if (!result.success) {
-      return result.error.issues[0]?.message;
-    }
-  },
-});
-
-export async function signupAction(_prev: unknown, formData: FormData) {
-  try {
-    await serverValidateSignup(formData);
-  } catch (e) {
-    if (e instanceof ServerValidateError) {
-      return e.formState;
-    }
-    throw e;
+export async function signupAction(
+  data: SignupInput,
+): Promise<{ error: string } | undefined> {
+  const result = signupSchema.safeParse(data);
+  if (!result.success) {
+    return { error: result.error.issues[0]?.message ?? "Invalid input" };
   }
 
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
-  const firstName = formData.get("firstName") as string;
-  const lastName = formData.get("lastName") as string;
+  const { email, password, firstName, lastName } = result.data;
 
   const supabase = await createClient();
-  const { data, error } = await supabase.auth.signUp({ email, password });
+  const { data: authData, error } = await supabase.auth.signUp({
+    email,
+    password,
+  });
 
   if (error) {
-    return {
-      errorMap: { onServer: error.message },
-      errors: [],
-      values: { email, password, firstName, lastName, confirmPassword: "" },
-    };
+    return { error: error.message };
   }
 
-  const userId = data.user?.id;
+  const userId = authData.user?.id;
   if (!userId) {
-    return {
-      errorMap: { onServer: "Signup succeeded but no user was returned" },
-      errors: [],
-      values: { email, password, firstName, lastName, confirmPassword: "" },
-    };
+    return { error: "Signup succeeded but no user was returned" };
   }
 
   const studentError = await createStudent(userId, email, firstName, lastName);
   if (studentError) {
-    return {
-      errorMap: { onServer: studentError.error },
-      errors: [],
-      values: { email, password, firstName, lastName, confirmPassword: "" },
-    };
+    return { error: studentError.error };
   }
 
   redirect("/");

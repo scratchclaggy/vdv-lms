@@ -26,9 +26,6 @@ importers:
       '@tanstack/react-form':
         specifier: ^1.28.3
         version: 1.28.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      '@tanstack/react-form-nextjs':
-        specifier: ^1.28.3
-        version: 1.28.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       next:
         specifier: 16.1.6
         version: 16.1.6(@babel/core@7.29.0)(@playwright/test@1.58.2)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -1129,15 +1126,6 @@ packages:
     peerDependencies:
       react: ^17.0.0 || ^18.0.0 || ^19.0.0
 
-  '@tanstack/react-form-nextjs@1.28.3':
-    resolution: {integrity: sha512-32gXlrpsoOZ0ZBDf54enLWnbczi71pxHXpEXAvHAUxuYrLB7Tl+BxN0NIRB0DoV688goeHkZRRQ3PT85V0wTZw==}
-    peerDependencies:
-      '@tanstack/react-start': ^1.134.9
-      react: ^17.0.0 || ^18.0.0 || ^19.0.0
-    peerDependenciesMeta:
-      '@tanstack/react-start':
-        optional: true
-
   '@tanstack/react-form@1.28.3':
     resolution: {integrity: sha512-84yd0swZRcyC3Q46dYBH6bHf1tlIY1flchbdG3VwArg/wLVW5RdBenIrJhleHjk2OxXuF+9HoKQbHglJyWIXQA==}
     peerDependencies:
@@ -1345,9 +1333,6 @@ packages:
 
   decimal.js@10.6.0:
     resolution: {integrity: sha512-YpgQiITW3JXGntzdUmyUR1V812Hn8T1YVXhCu+wO3OpS4eU9l4YdD3qjyiKdV6mvV29zapkMeD390UVEf2lkUg==}
-
-  decode-formdata@0.9.0:
-    resolution: {integrity: sha512-q5uwOjR3Um5YD+ZWPOF/1sGHVW9A5rCrRwITQChRXlmPkxDFBqCm4jNTIVdGHNH9OnR+V9MoZVgRhsFb+ARbUw==}
 
   deepmerge-ts@7.1.5:
     resolution: {integrity: sha512-HOJkrhaYsweh+W+e74Yn7YStZOilkoPb6fycpwNLKzSPtruFs48nYis0zy5yJz1+ktUhHxoRDJ27RQAWLIJVJw==}
@@ -3058,14 +3043,6 @@ snapshots:
       - solid-js
       - vue
 
-  '@tanstack/react-form-nextjs@1.28.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
-    dependencies:
-      '@tanstack/react-form': 1.28.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      decode-formdata: 0.9.0
-      react: 19.2.3
-    transitivePeerDependencies:
-      - react-dom
-
   '@tanstack/react-form@1.28.3(react-dom@19.2.3(react@19.2.3))(react@19.2.3)':
     dependencies:
       '@tanstack/form-core': 1.28.3
@@ -3289,8 +3266,6 @@ snapshots:
       ms: 2.1.3
 
   decimal.js@10.6.0: {}
-
-  decode-formdata@0.9.0: {}
 
   deepmerge-ts@7.1.5: {}
 

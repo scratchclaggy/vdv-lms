@@ -1,30 +1,30 @@
 "use client";
 
-import {
-  initialFormState,
-  mergeForm,
-  useStore,
-  useTransform,
-} from "@tanstack/react-form-nextjs";
 import Link from "next/link";
-import { useActionState } from "react";
-import { z } from "zod/mini";
-import { signupFormOptions } from "@/app/auth/form-options";
+import { useState } from "react";
 import { signupAction } from "@/app/auth/signup";
+import { signupSchema } from "@/app/auth/signup-schema";
 import { useAppForm } from "@/components/form/use-app-form";
 
 export default function SignupPage() {
-  const [state, action] = useActionState(signupAction, initialFormState);
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useAppForm({
-    ...signupFormOptions,
-    transform: useTransform(
-      (baseForm) => mergeForm(baseForm, state ?? initialFormState),
-      [state],
-    ),
+    defaultValues: {
+      firstName: "",
+      lastName: "",
+      email: "",
+      password: "",
+      confirmPassword: "",
+    },
+    onSubmit: async ({ value }) => {
+      setServerError(null);
+      const result = await signupAction(value);
+      if (result?.error) {
+        setServerError(result.error);
+      }
+    },
   });
-
-  const formErrors = useStore(form.store, (s) => s.errors);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-base-200">
@@ -32,17 +32,17 @@ export default function SignupPage() {
         <div className="card-body gap-4">
           <h1 className="card-title text-2xl justify-center">Create account</h1>
 
-          {formErrors.length > 0 && (
+          {serverError && (
             <div role="alert" className="alert alert-error">
-              {formErrors.map((error) => (
-                <span key={String(error)}>{String(error)}</span>
-              ))}
+              <span>{serverError}</span>
             </div>
           )}
 
           <form
-            action={action as never}
-            onSubmit={() => form.handleSubmit()}
+            onSubmit={(e) => {
+              e.preventDefault();
+              form.handleSubmit();
+            }}
             className="flex flex-col gap-4"
           >
             <form.AppForm>
@@ -50,7 +50,13 @@ export default function SignupPage() {
                 <form.AppField
                   name="firstName"
                   validators={{
-                    onChange: ({ value }) => (!value ? "Required" : undefined),
+                    onChange: ({ value }) => {
+                      const result =
+                        signupSchema.shape.firstName.safeParse(value);
+                      return result.success
+                        ? undefined
+                        : result.error.issues[0]?.message;
+                    },
                   }}
                 >
                   {(field) => (
@@ -67,7 +73,13 @@ export default function SignupPage() {
                 <form.AppField
                   name="lastName"
                   validators={{
-                    onChange: ({ value }) => (!value ? "Required" : undefined),
+                    onChange: ({ value }) => {
+                      const result =
+                        signupSchema.shape.lastName.safeParse(value);
+                      return result.success
+                        ? undefined
+                        : result.error.issues[0]?.message;
+                    },
                   }}
                 >
                   {(field) => (
@@ -86,9 +98,10 @@ export default function SignupPage() {
                 name="email"
                 validators={{
                   onChange: ({ value }) => {
-                    if (!value) return "Email is required";
-                    const result = z.email().safeParse(value);
-                    return result.success ? undefined : "Enter a valid email";
+                    const result = signupSchema.shape.email.safeParse(value);
+                    return result.success
+                      ? undefined
+                      : result.error.issues[0]?.message;
                   },
                 }}
               >
@@ -105,12 +118,12 @@ export default function SignupPage() {
               <form.AppField
                 name="password"
                 validators={{
-                  onChange: ({ value }) =>
-                    !value
-                      ? "Password is required"
-                      : value.length < 8
-                        ? "Password must be at least 8 characters"
-                        : undefined,
+                  onChange: ({ value }) => {
+                    const result = signupSchema.shape.password.safeParse(value);
+                    return result.success
+                      ? undefined
+                      : result.error.issues[0]?.message;
+                  },
                 }}
               >
                 {(field) => (
@@ -127,11 +140,8 @@ export default function SignupPage() {
                   onChangeListenTo: ["password"],
                   onChange: ({ value, fieldApi }) => {
                     const password = fieldApi.form.getFieldValue("password");
-                    return !value
-                      ? "Please confirm your password"
-                      : value !== password
-                        ? "Passwords do not match"
-                        : undefined;
+                    if (!value) return "Please confirm your password";
+                    if (value !== password) return "Passwords do not match";
                   },
                 }}
               >

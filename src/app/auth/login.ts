@@ -1,51 +1,26 @@
 "use server";
 
-import {
-  createServerValidate,
-  ServerValidateError,
-} from "@tanstack/react-form-nextjs";
 import { redirect } from "next/navigation";
-import { z } from "zod";
+import { loginSchema } from "@/app/auth/login-schema";
 import { createClient } from "@/supabase/server";
-import { loginFormOptions } from "./form-options";
+import type { LoginInput } from "./login-schema";
 
-const loginSchema = z.object({
-  email: z.email(),
-  password: z.string().min(1, "Password is required"),
-});
-
-const serverValidateLogin = createServerValidate({
-  ...loginFormOptions,
-  onServerValidate: ({ value }) => {
-    const result = loginSchema.safeParse(value);
-    if (!result.success) {
-      return result.error.issues[0]?.message;
-    }
-  },
-});
-
-export async function loginAction(_prev: unknown, formData: FormData) {
-  try {
-    await serverValidateLogin(formData);
-  } catch (e) {
-    if (e instanceof ServerValidateError) {
-      return e.formState;
-    }
-    throw e;
+export async function loginAction(
+  data: LoginInput,
+): Promise<{ error: string } | undefined> {
+  const result = loginSchema.safeParse(data);
+  if (!result.success) {
+    return { error: result.error.issues[0]?.message ?? "Invalid input" };
   }
 
-  const email = formData.get("email") as string;
-  const password = formData.get("password") as string;
-
   const supabase = await createClient();
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const { error } = await supabase.auth.signInWithPassword({
+    email: result.data.email,
+    password: result.data.password,
+  });
 
   if (error) {
-    return {
-      errorMap: { onServer: error.message },
-      errors: [],
-      values: { email, password },
-    };
+    return { error: error.message };
   }
 
   redirect("/");

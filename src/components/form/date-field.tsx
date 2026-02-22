@@ -2,19 +2,11 @@
 
 import { useFieldContext } from "./form-context";
 
-interface TextFieldProps {
+interface DateFieldProps {
   label: string;
-  placeholder?: string;
-  type?: "text" | "email";
-  autoComplete?: string;
 }
 
-export function TextField({
-  label,
-  placeholder,
-  type = "text",
-  autoComplete,
-}: TextFieldProps) {
+export function DateField({ label }: DateFieldProps) {
   const field = useFieldContext<string>();
   const hasError =
     field.state.meta.isTouched && field.state.meta.errors.length > 0;
@@ -25,13 +17,11 @@ export function TextField({
       <input
         id={field.name}
         name={field.name}
-        type={type}
+        type="date"
         value={field.state.value}
         onBlur={field.handleBlur}
         onChange={(e) => field.handleChange(e.target.value)}
-        placeholder={placeholder}
         className={`input w-full ${hasError ? "input-error" : ""}`}
-        autoComplete={autoComplete}
       />
       {hasError && (
         <p className="fieldset-label text-error">

@@ -1,8 +1,10 @@
 import { redirect } from "next/navigation";
 import { getConsultationsAction } from "@/app/consultations/get-consultations-action";
 import { getNextConsultationAction } from "@/app/consultations/get-next-consultation-action";
+import { getTutorsAction } from "@/app/consultations/get-tutors-action";
 import type { ConsultationWithRelations } from "@/app/consultations/types";
 import { ConsultationsList } from "@/app/dashboard/consultations-list";
+import { ScheduleConsultationButton } from "@/app/dashboard/create-consultation-modal";
 import { DateRangePicker } from "@/app/dashboard/date-range-picker";
 import { HideCompletedToggle } from "@/app/dashboard/hide-completed-toggle";
 import { getDisplayName, NavBar } from "@/app/dashboard/nav-bar";
@@ -26,10 +28,12 @@ export default async function Home({ searchParams }: Props) {
 
   let consultations: ConsultationWithRelations[];
   let nextConsultation: ConsultationWithRelations | null;
+  let tutors: Awaited<ReturnType<typeof getTutorsAction>>;
   try {
-    [consultations, nextConsultation] = await Promise.all([
+    [consultations, nextConsultation, tutors] = await Promise.all([
       getConsultationsAction(from, to, shouldHideCompleted),
       getNextConsultationAction(),
+      getTutorsAction(),
     ]);
   } catch (error) {
     if (error instanceof UnauthorizedError) {
@@ -69,13 +73,7 @@ export default async function Home({ searchParams }: Props) {
           </div>
         </section>
       </main>
-      <button
-        type="button"
-        className="btn btn-primary fixed bottom-6 right-6 shadow-lg"
-        disabled
-      >
-        Schedule New Consultation
-      </button>
+      <ScheduleConsultationButton currentUserId={user.id} tutors={tutors} />
     </div>
   );
 }

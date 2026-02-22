@@ -1,29 +1,24 @@
 "use client";
 
-import {
-  initialFormState,
-  mergeForm,
-  useStore,
-  useTransform,
-} from "@tanstack/react-form-nextjs";
 import Link from "next/link";
-import { useActionState } from "react";
-import { loginFormOptions } from "@/app/auth/form-options";
+import { useState } from "react";
 import { loginAction } from "@/app/auth/login";
+import { loginSchema } from "@/app/auth/login-schema";
 import { useAppForm } from "@/components/form/use-app-form";
 
 export default function LoginPage() {
-  const [state, action] = useActionState(loginAction, initialFormState);
+  const [serverError, setServerError] = useState<string | null>(null);
 
   const form = useAppForm({
-    ...loginFormOptions,
-    transform: useTransform(
-      (baseForm) => mergeForm(baseForm, state ?? initialFormState),
-      [state],
-    ),
+    defaultValues: { email: "", password: "" },
+    onSubmit: async ({ value }) => {
+      setServerError(null);
+      const result = await loginAction(value);
+      if (result?.error) {
+        setServerError(result.error);
+      }
+    },
   });
-
-  const formErrors = useStore(form.store, (s) => s.errors);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-base-200">
@@ -31,29 +26,29 @@ export default function LoginPage() {
         <div className="card-body gap-4">
           <h1 className="card-title text-2xl justify-center">Sign in</h1>
 
-          {formErrors.length > 0 && (
+          {serverError && (
             <div role="alert" className="alert alert-error">
-              {formErrors.map((error) => (
-                <span key={String(error)}>{String(error)}</span>
-              ))}
+              <span>{serverError}</span>
             </div>
           )}
 
           <form
-            action={action as never}
-            onSubmit={() => form.handleSubmit()}
+            onSubmit={(e) => {
+              e.preventDefault();
+              form.handleSubmit();
+            }}
             className="flex flex-col gap-4"
           >
             <form.AppForm>
               <form.AppField
                 name="email"
                 validators={{
-                  onChange: ({ value }) =>
-                    !value
-                      ? "Email is required"
-                      : !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)
-                        ? "Enter a valid email"
-                        : undefined,
+                  onChange: ({ value }) => {
+                    const result = loginSchema.shape.email.safeParse(value);
+                    return result.success
+                      ? undefined
+                      : result.error.issues[0]?.message;
+                  },
                 }}
               >
                 {(field) => (
@@ -69,8 +64,12 @@ export default function LoginPage() {
               <form.AppField
                 name="password"
                 validators={{
-                  onChange: ({ value }) =>
-                    !value ? "Password is required" : undefined,
+                  onChange: ({ value }) => {
+                    const result = loginSchema.shape.password.safeParse(value);
+                    return result.success
+                      ? undefined
+                      : result.error.issues[0]?.message;
+                  },
                 }}
               >
                 {(field) => (
